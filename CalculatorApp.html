@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Big Calculator</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Using Tailwind defaults, but can add custom styles here if needed for specific elements not easily styled by Tailwind */
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .calculator-display {
+            background-color: #f9f9f9;
+            border: 3px solid #ddd;
+        }
+        .result.has-result { /* For percentage calculator */
+            background-color: #e8f5e8;
+            border-color: #4CAF50;
+            color: #2e7d32;
+        }
+        .calculator-buttons button, .percentage-calc button {
+            min-height: 60px;
+        }
+        .message-box-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .message-box-content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        .message-box-button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 py-8 px-4 sm:px-6 lg:px-8">
+    <h1 class="text-3xl sm:text-4xl font-bold text-center mb-8 text-gray-800">Calculator & Percentage Tool</h1>
+
+    <div class="container mx-auto max-w-4xl grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-10">
+        <!-- Main Calculator -->
+        <div class="calculator bg-white p-6 rounded-xl shadow-lg">
+            <h2 class="text-2xl font-semibold text-center mb-6 text-gray-700">Calculator</h2>
+            <input type="text" id="display" class="calculator-display w-full h-20 text-3xl font-bold text-right px-4 mb-5 rounded-lg box-border" readonly>
+
+            <div class="calculator-buttons grid grid-cols-4 gap-3">
+                <button class="bg-red-500 hover:bg-red-600 text-white font-bold py-4 rounded-lg text-xl" onclick="clearAllDisplay()">C</button>
+                <button class="bg-red-500 hover:bg-red-600 text-white font-bold py-4 rounded-lg text-xl" onclick="deleteLastChar()">⌫</button>
+                <button class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-4 rounded-lg text-xl" onclick="addOperatorToDisplay('%')">%</button>
+                <button class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-4 rounded-lg text-xl" onclick="addOperatorToDisplay('/')">÷</button>
+
+                <button class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-4 rounded-lg text-xl" onclick="addNumberToDisplay('7')">7</button>
+                <button class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-4 rounded-lg text-xl" onclick="addNumberToDisplay('8')">8</button>
+                <button class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-4 rounded-lg text-xl" onclick="addNumberToDisplay('9')">9</button>
+                <button class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-4 rounded-lg text-xl" onclick="addOperatorToDisplay('*')">×</button>
+
+                <button class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-4 rounded-lg text-xl" onclick="addNumberToDisplay('4')">4</button>
+                <button class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-4 rounded-lg text-xl" onclick="addNumberToDisplay('5')">5</button>
+                <button class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-4 rounded-lg text-xl" onclick="addNumberToDisplay('6')">6</button>
+                <button class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-4 rounded-lg text-xl" onclick="addOperatorToDisplay('-')">-</button>
+
+                <button class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-4 rounded-lg text-xl" onclick="addNumberToDisplay('1')">1</button>
+                <button class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-4 rounded-lg text-xl" onclick="addNumberToDisplay('2')">2</button>
+                <button class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-4 rounded-lg text-xl" onclick="addNumberToDisplay('3')">3</button>
+                <button class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-4 rounded-lg text-xl" onclick="addOperatorToDisplay('+')">+</button>
+
+                <button class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-4 rounded-lg text-xl col-span-2" onclick="addNumberToDisplay('0')">0</button>
+                <button class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-4 rounded-lg text-xl" onclick="addNumberToDisplay('.')">.</button>
+                <button class="bg-green-500 hover:bg-green-600 text-white font-bold py-4 rounded-lg text-xl" onclick="calculateFinalResult()">=</button>
+            </div>
+        </div>
+
+        <!-- Percentage Calculator -->
+        <div class="percentage-calc bg-white p-6 rounded-xl shadow-lg">
+            <h2 class="text-2xl font-semibold text-center mb-6 text-gray-700">Percentage Calculator</h2>
+            <label for="amount" class="block text-lg font-medium mb-1 text-gray-700">Enter Amount/Number:</label>
+            <input type="number" id="amount" placeholder="Enter amount" class="w-full h-14 text-xl px-4 mb-4 border-2 border-gray-300 rounded-lg box-border focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none">
+
+            <label for="percentage" class="block text-lg font-medium mb-1 text-gray-700">Enter Percentage (%):</label>
+            <input type="number" id="percentage" placeholder="Enter percentage" class="w-full h-14 text-xl px-4 mb-4 border-2 border-gray-300 rounded-lg box-border focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none">
+
+            <button class="w-full h-14 bg-blue-500 hover:bg-blue-600 text-white font-bold rounded-lg text-lg" onclick="calculatePercentageResult()">Calculate Percentage</button>
+
+            <div id="percentResult" class="result mt-5 p-6 min-h-[60px] text-3xl font-bold text-center text-gray-700 border-2 border-gray-300 rounded-lg flex items-center justify-center bg-gray-50">
+                Result will appear here
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Message Box Structure -->
+    <div id="customMessageBox" class="message-box-overlay" style="display: none;">
+        <div class="message-box-content">
+            <p id="messageBoxText"></p>
+            <button id="messageBoxButton" class="message-box-button">OK</button>
+        </div>
+    </div>
+
+    <script>
+        // --- Main Calculator ---
+        let currentInput = ''; // This string will hold the entire expression
+        let isResultDisplayed = false; // Flag to check if the current display value is a result
+        const displayElement = document.getElementById('display');
+
+        // Function to show custom message
+        function showMessage(message) {
+            document.getElementById('messageBoxText').textContent = message;
+            document.getElementById('customMessageBox').style.display = 'flex';
+        }
+
+        // Event listener for the custom message box button
+        document.getElementById('messageBoxButton').addEventListener('click', () => {
+            document.getElementById('customMessageBox').style.display = 'none';
+        });
+
+        function updateDisplayOnScreen() {
+            // Use display-friendly symbols for multiplication and division
+            const displayValue = currentInput
+                .replace(/\*/g, '×') // Replace '*' with '×'
+                .replace(/\//g, '÷'); // Replace '/' with '÷'
+            displayElement.value = displayValue || '0';
+        }
+
+        function addNumberToDisplay(num) {
+            if (isResultDisplayed) {
+                currentInput = ''; // Start a new calculation if a result was just displayed
+                isResultDisplayed = false;
+            }
+
+            // Prevent multiple decimal points in the current number segment.
+            // For example, allow "1.2+3.4" but not "1..2" or "1.2.3".
+            const parts = currentInput.split(/[\+\-\*\/%]/);
+            const currentNumberSegment = parts[parts.length - 1];
+            if (num === '.' && currentNumberSegment.includes('.')) {
+                return;
+            }
+
+            currentInput += num;
+            updateDisplayOnScreen();
+        }
+
+        function addOperatorToDisplay(op) {
+            if (currentInput === '' && op !== '-') { // Allow '-' to start a negative number
+                return; // Don't add operator if display is empty (unless it's a leading minus)
+            }
+            
+            // If the current input is just a minus and another operator is pressed,
+            // replace the minus (e.g. '-' then '+' becomes '+')
+            // unless the new operator is also a minus (don't allow '--' this way)
+            if (currentInput === '-' && op !== '-') {
+                 currentInput = op;
+                 isResultDisplayed = false;
+                 updateDisplayOnScreen();
+                 return;
+            }
+
+
+            const lastChar = currentInput.slice(-1);
+            const operators = ['+', '-', '*', '/', '%'];
+
+            if (operators.includes(lastChar)) {
+                // If the last character is an operator, replace it with the new operator
+                // Exception: allow expressions like '5*-' or '5/-' for negative numbers
+                if (op === '-' && (lastChar === '*' || lastChar === '/')) {
+                    currentInput += op; // Append '-' after '*' or '/'
+                } else {
+                    currentInput = currentInput.slice(0, -1) + op; // Replace the last operator
+                }
+            } else {
+                // If last char is not an operator, just append the new operator
+                currentInput += op;
+            }
+            isResultDisplayed = false; // Any operator means we are building an expression, not showing a final result
+            updateDisplayOnScreen();
+        }
+
+        function calculateFinalResult() {
+            if (currentInput === '' || isResultDisplayed) {
+                // If input is empty or we are already showing a result, do nothing.
+                // (Or, optionally, re-evaluate if '=' is pressed again on a result - not implemented here)
+                return;
+            }
+
+            const lastChar = currentInput.slice(-1);
+            const operatorsWithNegative = ['+', '*', '/', '%']; // '-' is allowed at the end if part of a negative number like '5*-'
+            
+            // Check if the expression ends with an operator that isn't part of a negative number sequence.
+            if (operatorsWithNegative.includes(lastChar) || (lastChar === '-' && operatorsWithNegative.includes(currentInput.slice(-2, -1)))) {
+                 if (!( (lastChar === '-') && (currentInput.slice(-2,-1) === '*' || currentInput.slice(-2,-1) === '/') ) ) {
+                    showMessage('Invalid expression: incomplete.');
+                    return;
+                 }
+            }
+
+
+            try {
+                // Using Function constructor for safer evaluation than direct eval()
+                // It evaluates the expression in the global scope, not local.
+                let result = new Function('return ' + currentInput)();
+
+                if (isNaN(result) || !isFinite(result)) {
+                    showMessage('Calculation error (e.g., division by zero).');
+                    currentInput = ''; // Clear input on such errors
+                    isResultDisplayed = false;
+                } else {
+                    // Round to a reasonable number of decimal places
+                    result = Math.round(result * 10000000000) / 10000000000; // 10 decimal places
+                    currentInput = result.toString();
+                    isResultDisplayed = true; // Mark that the display now shows a result
+                }
+            } catch (error) {
+                showMessage('Invalid expression format.');
+                // Optionally, leave currentInput as is for user to correct, or clear it:
+                // currentInput = '';
+                // isResultDisplayed = false;
+            }
+            updateDisplayOnScreen();
+        }
+
+        function clearAllDisplay() {
+            currentInput = '';
+            isResultDisplayed = false;
+            updateDisplayOnScreen();
+        }
+
+        function deleteLastChar() {
+            if (isResultDisplayed) {
+                // If a result is shown, 'delete' acts like 'clear'
+                clearAllDisplay();
+                return;
+            }
+            currentInput = currentInput.slice(0, -1);
+            updateDisplayOnScreen();
+        }
+
+        // --- Percentage Calculator (Separate Logic - Unchanged from previous working version) ---
+        const amountInput = document.getElementById('amount');
+        const percentageInput = document.getElementById('percentage');
+        const percentResultDiv = document.getElementById('percentResult');
+
+        function calculatePercentageResult() {
+            const amount = parseFloat(amountInput.value);
+            const percentage = parseFloat(percentageInput.value);
+
+            if (isNaN(amount) || isNaN(percentage)) {
+                percentResultDiv.innerHTML = 'Please enter valid numbers';
+                percentResultDiv.classList.remove('has-result', 'bg-green-50', 'border-green-600', 'text-green-800');
+                percentResultDiv.classList.add('text-red-600');
+                return;
+            }
+            if (percentage < 0) {
+                percentResultDiv.innerHTML = 'Percentage cannot be negative.';
+                percentResultDiv.classList.remove('has-result', 'bg-green-50', 'border-green-600', 'text-green-800');
+                percentResultDiv.classList.add('text-red-600');
+                return;
+            }
+
+            const result = (amount * percentage) / 100;
+            const finalResult = Math.round(result * 100000000) / 100000000;
+
+            percentResultDiv.innerHTML = finalResult;
+            percentResultDiv.classList.add('has-result', 'bg-green-50', 'border-green-600', 'text-green-800');
+            percentResultDiv.classList.remove('text-red-600');
+        }
+
+        amountInput.addEventListener('input', () => {
+            if (amountInput.value && percentageInput.value) {
+                calculatePercentageResult();
+            } else if (!amountInput.value && !percentageInput.value) {
+                 percentResultDiv.innerHTML = 'Result will appear here';
+                 percentResultDiv.classList.remove('has-result', 'bg-green-50', 'border-green-600', 'text-green-800', 'text-red-600');
+            }
+        });
+
+        percentageInput.addEventListener('input', () => {
+            if (amountInput.value && percentageInput.value) {
+                calculatePercentageResult();
+            } else if (!amountInput.value && !percentageInput.value) {
+                 percentResultDiv.innerHTML = 'Result will appear here';
+                 percentResultDiv.classList.remove('has-result', 'bg-green-50', 'border-green-600', 'text-green-800', 'text-red-600');
+            }
+        });
+
+        // Initialize display for calculator
+        updateDisplayOnScreen();
+    </script>
+</body>
+</html>
+
